@@ -106,3 +106,109 @@ Here are some typical use cases for each scope:
 - Request scope: Specific situations, such as request tracking, require a request-based lifetime. One example is request tracking in a distributed microservices environment. Let’s say we need to log request headers, time stamps, and other request-specific details for an API with a microservices architecture. With request scope, we can create a new instance for each request, allowing each microservice to log request-specific details and context, making it easier to correlate and trace the path of a request as it moves from one microservice to another.
 
 - Transient scope: This can be beneficial when we need independent instances with their state for different parts of the application. For example, consider LoggerService, which contains a consumer-specific prefix. To maintain individual prefixes for each consumer, we utilize the transient scope, ensuring that a new LoggerService instance is generated for each consumer. Consequently, the prefix property remains distinct and isn’t overridden.
+
+## Project 01: Address-Book-Api
+
+### Description
+
+Explore building a secure and robust Address Book API with NestJS. Learn RESTful API design, CRUD operations with TypeORM and MySQL, JWT authentication, request validation, testing strategies, and deploying your API on AWS.
+
+#### Step 1: Start the new NestJS project
+
+``` shell
+nest new 01-address-book-api
+```
+
+##### Entry point
+
+The project entry point is the main.ts file in which the NestFactory and AppModule are imported. The NestFactory.create function create an app based on the modules used by the AppModule.
+
+``` typescript
+    import { NestFactory } from '@nestjs/core';
+    import { AppModule } from './app.module';
+
+    async function bootstrap() {
+        const app = await NestFactory.create(AppModule);
+        app.enableCors();
+        await app.listen(3000);
+    }
+
+    bootstrap();
+```
+
+##### Module creation with NestJS CLI
+
+The most common CLI command is the generate command.
+
+With the *nest g resource address* command we create a new module with a boilerplate code like a controller, service, DTO, and module instead of creating manually these files individually.
+
+Lets'create the first module AddressBook
+
+``` bash
+nest g module AddressBook
+```
+
+the command *nest g module ModuleName* create only the module file
+
+``` typescript
+    import { Module } from '@nestjs/common';
+
+    @Module({})
+    export class AddressBookModule {}
+```
+
+This command also updates the root module by adding imports of the new module
+
+``` typescript
+    import { Module } from '@nestjs/common';
+    import { AppController } from './app.controller';
+    import { AppService } from './app.service';
+    import { AddressBookModule } from './address-book/address-book.module';
+
+    @Module({
+    imports: [AddressBookModule],
+    controllers: [AppController],
+    providers: [AppService],
+    })
+    export class AppModule {}
+
+```
+
+With the module only we won't go any further. We need files to manage the AddressBook logic. Let's start with the controller
+
+``` shell
+nest g controller Address
+```
+
+The AddressController controller will be generated as follows:
+
+``` typescript
+import { Controller } from '@nestjs/common';
+
+@Controller('address')
+export class AddressController {}
+```
+
+This controller will be added iin the AppModule, too
+
+``` typescript
+...
+@Module({
+  controllers: [AppController, AddressController],
+  ...
+})
+...
+```
+
+Let's add a service
+
+``` shell
+nest g service Address
+```
+
+``` typescript
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class AddressService {}
+```
