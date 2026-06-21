@@ -212,3 +212,119 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class AddressService {}
 ```
+
+Move on with DTOs
+
+NestJS CLI does not have commands to create DTOs, so we need to create manually.
+
+Let's pretend we have a User class and we need a DTO to represent it
+
+``` typescript
+
+export class UserDto {
+  userId: number;
+  name: string;
+  email: string;
+}
+
+```
+
+We can use this representation in controllers
+
+``` typescript
+@Get()
+findAll(): UserDto[] {
+    return this.usersService.findAll();
+}
+```
+
+We can extend DTOs to include other properties
+
+``` typescript
+export class CreateUserDto extends UserDto {
+    password: string;
+}
+```
+
+With the CreateUserDto class, the server API will know the data shape from the request body.
+
+``` typescript
+@Post()
+create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+}
+```
+
+Here, the create method expects a request body from a POST request. The @Body decorator will extract the request body and deserialize it into a CreateUserDto instance. The DTO is then passed to the service to perform the user creation.
+
+We will also create UpdateUserDto for updating the user.
+
+``` typescript
+import { PartialType } from '@nestjs/mapped-types';
+import { UserDto } from './user.dto';
+
+export class UpdateUserDto extends PartialType(UserDto) {}
+```
+
+NestJS provides the PartialType utility class. When we extend UpdateUserDto using PartialType, UpdateUserDto inherits all the properties from UserDto, which means it includes properties like firstName, lastName, and email. By applying PartialType, every property in UpdateUserDto becomes optional, allowing us to send partial data when updating resources.
+
+The @nestjs/mapped-types package needs to be installed to get PartialType to work.
+
+``` shell
+npm i @nestjs/mapped-types --save
+```
+
+### Entity
+
+An entity represents the structure and relationships of data objects in our NestJS app. They are used to interact with the underlying database.
+
+In NestJS, the entity usually incorporates decorators from ORMs, such as TypeORM, to define the relationships and database-related properties.
+
+``` typescript
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+@Entity()
+export class Address {
+  @PrimaryGeneratedColumn()
+  @Column()
+  id!: number;
+
+  @Column()
+  addressLine!: string;
+
+  @Column()
+  postCode!: string;
+
+  @Column()
+  state!: string;
+
+  @Column()
+  createdDate!: Date;
+}
+
+```
+
+Get address by id endpoint
+
+``` typescript
+@Injectable()
+export class AddressService {
+  private addressDataStore: AddressDto[] = [];
+  // Retrieves an address by its unique ID.
+  getById(id: number) {
+    // Finds an address in the 'addresses' store
+    // where the 'id' property matches the provided 'id'.
+    return this.addressDataStore.find(t => t.id === id);
+  }
+}
+```
+
+Create the getById endpoint
+
+``` typescript
+@Get(':id')
+getById(@Param('id', ParseIntPipe) id: number): Address {
+  return this.addressService.getById(id);
+}
+```
