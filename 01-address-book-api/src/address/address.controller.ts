@@ -17,31 +17,33 @@ export class AddressController {
   constructor(private readonly addressService: AddressService) {}
 
   @Get('all')
-  getAll() {
-    return this.addressService.getAll();
+  async getAll(): Promise<AddressDto[]> {
+    const data = await this.addressService.getAll();
+    return data;
   }
 
   @Get(':id')
-  getById(@Param('id', ParseIntPipe) id: number) {
-    return this.addressService.getById(id);
+  async get(@Param('id', ParseIntPipe) id: number): Promise<AddressDto> {
+    const address = await this.addressService.get(id);
+    return address;
   }
 
   @Post()
   @HttpCode(200)
-  create(@Body() address: CreateAddressDto) {
-    return this.addressService.create(address);
+  async create(@Body() address: CreateAddressDto) {
+    return await this.addressService.create(address);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() address: AddressDto,
-  ): void {
-    return this.addressService.update(id, address);
+  ) {
+    return await this.addressService.update(id, address);
   }
 
   @Delete(':id')
-  deleteById(@Param('id', ParseIntPipe) id: number) {
-    return this.addressService.delete(id);
+  async deleteById(@Param('id', ParseIntPipe) id: number) {
+    return await this.addressService.delete(id);
   }
 }

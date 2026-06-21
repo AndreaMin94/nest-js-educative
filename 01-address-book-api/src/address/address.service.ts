@@ -13,31 +13,46 @@ export class AddressService {
     },
   ];
 
-  getById(id: number) {
-    return this.addressDataStore.findLast((t) => t.id === id);
+  async get(id: number): Promise<AddressDto> {
+    return new Promise((resolve) => {
+      const result = this.addressDataStore.find((t) => t.id === id)!;
+      resolve(result);
+    });
+  }
+  async getAll(): Promise<AddressDto[]> {
+    return new Promise((resolve) => {
+      resolve(this.addressDataStore);
+    });
   }
 
-  getAll() {
-    return this.addressDataStore;
-  }
-
-  create(address: CreateAddressDto) {
+  async create(address: CreateAddressDto): Promise<void> {
     const id =
       this.addressDataStore.length === 0
         ? 0
         : Math.max(...this.addressDataStore.map((t) => t.id));
+    const newAddress = {
+      ...address,
+      id: id + 1,
+      createdDate: new Date(),
+    };
 
-    const newAddress = { ...address, id: id + 1, createdDate: new Date() };
-    this.addressDataStore.push(newAddress);
+    return new Promise((resolve) => {
+      this.addressDataStore.push(newAddress);
+      resolve();
+    });
+  }
+  async update(id: number, address: AddressDto): Promise<void> {
+    return new Promise((resolve) => {
+      const index = this.addressDataStore.findIndex((x) => x.id === id);
+      this.addressDataStore[index] = address;
+      resolve();
+    });
   }
 
-  update(id: number, address: AddressDto): void {
-    const index = this.addressDataStore.findIndex((x) => x.id === id);
-    this.addressDataStore[index] = address;
-  }
-
-  delete(id: number) {
-    const index = this.addressDataStore.findIndex((x) => x.id === id);
-    this.addressDataStore.splice(index, 1);
+  async delete(id: number): Promise<void> {
+    return new Promise((resolve) => {
+      this.addressDataStore = this.addressDataStore.filter((t) => t.id !== id);
+      resolve();
+    });
   }
 }
